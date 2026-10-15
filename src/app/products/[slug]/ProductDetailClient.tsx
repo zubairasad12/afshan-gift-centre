@@ -406,9 +406,9 @@ export default function ProductDetailClient({
               <div className="flex items-start gap-3">
                 <ShieldCheck className="w-5 h-5 text-[#B8956A] shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="font-semibold text-[#2C2C2C]">Authentic Solid Wood & Finish Guarantee</h4>
+                  <h4 className="font-semibold text-[#2C2C2C]">Authentic Quality Guarantee</h4>
                   <p className="mt-0.5 text-stone-500 leading-relaxed">
-                    Crafted from seasoned Sheesham and premium hardwoods. Backed by Afshan Gift Centre quality assurance.
+                    Every item is crafted from genuine premium materials — from hand-hammered brass and kiln-fired ceramics to mother-of-pearl inlays and fluted glass. Backed by Afshan Gift Centre quality assurance.
                   </p>
                 </div>
               </div>
@@ -479,11 +479,11 @@ export default function ProductDetailClient({
                   </div>
                   <div>
                     <span className="text-xs uppercase text-stone-400 tracking-wider block">Primary Material</span>
-                    <span className="font-semibold text-[#2C2C2C]">{product.material || 'Solid Sheesham Hardwood'}</span>
+                    <span className="font-semibold text-[#2C2C2C]">{product.material || 'Premium Artisan Materials'}</span>
                   </div>
                   <div>
-                    <span className="text-xs uppercase text-stone-400 tracking-wider block">Assembly</span>
-                    <span className="font-semibold text-[#2C2C2C]">Pre-assembled / Minimal tools required</span>
+                    <span className="text-xs uppercase text-stone-400 tracking-wider block">Packaging</span>
+                    <span className="font-semibold text-[#2C2C2C]">Gift-ready with fragile-safe cushioning</span>
                   </div>
                 </div>
               </div>
@@ -499,7 +499,7 @@ export default function ProductDetailClient({
                     </tr>
                     <tr>
                       <td className="py-2.5 font-semibold text-stone-700">Material & Finish</td>
-                      <td className="py-2.5 text-[#2C2C2C]">{product.material || 'Seasoned Sheesham / Satin Polyurethane'}</td>
+                      <td className="py-2.5 text-[#2C2C2C]">{product.material || 'Premium artisan materials — see product description'}</td>
                     </tr>
                     <tr>
                       <td className="py-2.5 font-semibold text-stone-700">Care Instructions</td>

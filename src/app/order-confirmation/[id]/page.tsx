@@ -69,12 +69,12 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
       items: [
         {
           id: 'demo-item-1',
-          productName: 'Royale Chesterfield 3-Seater Velvet Sofa',
-          variantName: 'Emerald Velvet',
-          sku: 'AGC-SOF-001',
-          price: 85000,
+          productName: 'Metal Tissue Box – Gold Edition',
+          variantName: 'Gold Finish',
+          sku: 'AGC-TB-001',
+          price: 3450,
           quantity: 1,
-          total: 85000,
+          total: 3450,
         },
       ],
     };

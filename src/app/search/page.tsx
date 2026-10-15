@@ -211,7 +211,16 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
           {/* Popular Search Suggestions */}
           <div className="mt-4 flex flex-wrap justify-center items-center gap-2 text-xs text-stone-500">
-            <span className="text-stone-400 font-medium">Popular:</span>
+            {query ? (
+              <Link
+                href="/search"
+                className="px-3 py-1 bg-stone-100 border border-stone-300 hover:bg-stone-200 text-stone-600 hover:text-[#2C2C2C] transition-colors flex items-center gap-1.5"
+              >
+                <span>✕</span> Clear search
+              </Link>
+            ) : (
+              <span className="text-stone-400 font-medium">Popular:</span>
+            )}
             {POPULAR_SEARCH_TERMS.map((term) => (
               <Link
                 key={term}

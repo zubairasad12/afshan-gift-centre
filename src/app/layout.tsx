@@ -21,19 +21,20 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: `${SITE_NAME} | Premium Furniture & Home Decor | Vehari, Pakistan`,
+  title: `${SITE_NAME} | Gifts, Home Decor & Fine Accents | Vehari, Pakistan`,
   description: SITE_DESCRIPTION,
   keywords: [
-    'furniture Vehari',
+    'gift shop Vehari',
     'home decor Pakistan',
-    'luxury sofas',
-    'dining tables',
-    'chandeliers Vehari',
+    'tissue boxes',
+    'decorative vases',
+    'wall frames Vehari',
+    'botanical plants',
     'Afshan Gift Centre',
   ],
   authors: [{ name: 'Afshan Gift Centre' }],
   openGraph: {
-    title: `${SITE_NAME} | Premium Furniture & Home Decor | Vehari, Pakistan`,
+    title: `${SITE_NAME} | Gifts, Home Decor & Fine Accents | Vehari, Pakistan`,
     description: SITE_DESCRIPTION,
     url: 'https://afshangiftcentre.com',
     siteName: SITE_NAME,

@@ -29,7 +29,6 @@ const GIFT_COLLECTIONS: CollectionItem[] = [
     description: 'Gold metal embossed, mirror finished, and luxury crystal tissue box covers.',
     image: '/uploads/1791997481095-WhatsApp_Image_2026-10-13_at_8.57.34_PM.jpeg',
     categoryGroup: 'Gifts',
-    itemCount: 18,
   },
   {
     id: 'c-plants',
@@ -38,7 +37,6 @@ const GIFT_COLLECTIONS: CollectionItem[] = [
     description: 'Lifelike faux greenery, money plant leaves, banana leaf decor, and evergreen botanicals.',
     image: '/uploads/1791997237049-WhatsApp_Image_2026-10-13_at_8.57.42_PM__1_.jpeg',
     categoryGroup: 'Botanicals',
-    itemCount: 24,
   },
   {
     id: 'c-pots',
@@ -47,7 +45,6 @@ const GIFT_COLLECTIONS: CollectionItem[] = [
     description: 'Hand-hammered brass metal planters, ribbed ceramic pots, and dual-tone stands.',
     image: '/uploads/1791998246038-WhatsApp_Image_2026-10-13_at_8.57.58_PM__1_.jpeg',
     categoryGroup: 'Botanicals',
-    itemCount: 20,
   },
   {
     id: 'c-vases',
@@ -56,7 +53,6 @@ const GIFT_COLLECTIONS: CollectionItem[] = [
     description: 'Fluted glass, tinted borosilicate, and textured stoneware vases for elegant living spaces.',
     image: '/uploads/1791998850209-WhatsApp_Image_2026-10-13_at_8.57.33_PM.jpeg',
     categoryGroup: 'Decor',
-    itemCount: 28,
   },
   {
     id: 'c-wall-frames',
@@ -65,7 +61,6 @@ const GIFT_COLLECTIONS: CollectionItem[] = [
     description: '3D floral metal frames, calligraphy wall decor, and gilded multi-tone hanging art.',
     image: '/uploads/1791996994883-WhatsApp_Image_2026-10-13_at_8.57.47_PM__2_.jpeg',
     categoryGroup: 'Decor',
-    itemCount: 32,
   },
   {
     id: 'c-table-lamps',
@@ -74,7 +69,6 @@ const GIFT_COLLECTIONS: CollectionItem[] = [
     description: 'Amber fluted glass, pleated shade accents, and warm bedside ambient lamps.',
     image: '/uploads/1791996953409-WhatsApp_Image_2026-10-13_at_8.57.43_PM__1_.jpeg',
     categoryGroup: 'Lighting',
-    itemCount: 15,
   },
   {
     id: 'c-floor-lamps',
@@ -83,7 +77,6 @@ const GIFT_COLLECTIONS: CollectionItem[] = [
     description: 'Minimalist arc floor lamps with heavy marble base for reading corners.',
     image: '/uploads/1791997730155-WhatsApp_Image_2026-10-13_at_8.57.43_PM.jpeg',
     categoryGroup: 'Lighting',
-    itemCount: 8,
   },
   {
     id: 'c-candle-stands',
@@ -92,7 +85,6 @@ const GIFT_COLLECTIONS: CollectionItem[] = [
     description: 'Rose quartz pedestals, brass candelabras, and crystal candle holders.',
     image: '/uploads/1791997169258-WhatsApp_Image_2026-10-13_at_8.57.40_PM.jpeg',
     categoryGroup: 'Gifts',
-    itemCount: 16,
   },
   {
     id: 'c-scented-candles',
@@ -101,7 +93,6 @@ const GIFT_COLLECTIONS: CollectionItem[] = [
     description: 'Amber jar scented candles and decorative bird sparrow candles.',
     image: '/uploads/1791997665357-WhatsApp_Image_2026-10-13_at_8.57.40_PM__1_.jpeg',
     categoryGroup: 'Gifts',
-    itemCount: 14,
   },
   {
     id: 'c-crystal-jar',
@@ -110,7 +101,6 @@ const GIFT_COLLECTIONS: CollectionItem[] = [
     description: 'Decorative globe candy jars and crystal dry fruit sets with lids.',
     image: '/uploads/1791997405884-WhatsApp_Image_2026-10-13_at_8.57.35_PM__2_.jpeg',
     categoryGroup: 'Gifts',
-    itemCount: 12,
   },
   {
     id: 'c-plant-holders-stand',
@@ -119,7 +109,6 @@ const GIFT_COLLECTIONS: CollectionItem[] = [
     description: 'Metal cage plant holders, cycle stands, and elevated cactus plant displays.',
     image: '/uploads/1791997278580-WhatsApp_Image_2026-10-13_at_8.57.49_PM__1_.jpeg',
     categoryGroup: 'Botanicals',
-    itemCount: 15,
   },
 ];
 
@@ -147,13 +136,13 @@ export default async function CollectionsPage() {
     console.error('Error fetching dynamic collection counts:', err);
   }
 
-  const giftHighlights = [
-    { name: 'Tissue Boxes', slug: 'tissue-boxes', count: '18 Designs' },
-    { name: 'Plants', slug: 'plants', count: '24 Designs' },
-    { name: 'Pots', slug: 'pots', count: '20 Designs' },
-    { name: 'Vases', slug: 'vases', count: '28 Designs' },
-    { name: 'Wall Frames', slug: 'wall-frames', count: '32 Designs' },
-  ];
+  const giftHighlights = collections
+    .slice(0, 5)
+    .map((c) => ({
+      name: c.name,
+      slug: c.slug,
+      count: c.itemCount != null ? `${c.itemCount} Items` : 'View All',
+    }));
 
   return (
     <div className="bg-[#FAFAF7] min-h-screen">
@@ -211,7 +200,7 @@ export default async function CollectionsPage() {
                   </div>
                   <div className="absolute bottom-4 left-4 right-4 text-white">
                     <span className="text-xs uppercase tracking-wider text-amber-200">
-                      {col.itemCount ? `${col.itemCount} Items` : 'Featured Collection'}
+                      {col.itemCount != null && col.itemCount > 0 ? `${col.itemCount} Items` : col.categoryGroup}
                     </span>
                     <h3 className="font-serif text-xl sm:text-2xl font-bold mt-0.5">
                       {col.name}

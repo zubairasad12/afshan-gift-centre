@@ -100,7 +100,7 @@ export const CartDrawer: React.FC = () => {
                   Your cart is currently empty
                 </h3>
                 <p className="text-xs text-stone-500 max-w-xs mb-6">
-                  Explore our handcrafted furniture and curated luxury decor to find items you love.
+                  Explore our curated gifts and luxury home decor to find items you love.
                 </p>
                 <Button variant="primary" onClick={closeCart}>
                   Continue Shopping

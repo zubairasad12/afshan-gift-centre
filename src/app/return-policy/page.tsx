@@ -81,7 +81,7 @@ export default function ReturnPolicyPage() {
             </div>
           </div>
           <p className="text-sm sm:text-base text-[#5E5E5E] leading-relaxed">
-            At Afshan Gift Centre, we understand buying furniture and delicate interior decor online requires trust. Every piece leaves our Vehari workshop after comprehensive inspection. We give you seven (7) calendar days from parcel receipt to examine every angle, drawer glide, cushion seam, and wooden finish in your home.
+            At Afshan Gift Centre, we understand buying delicate home decor and gift items online requires trust. Every piece leaves our Vehari showroom after comprehensive inspection. We give you seven (7) calendar days from parcel receipt to examine every angle and finish in your home.
           </p>
         </div>
 
@@ -145,7 +145,7 @@ export default function ReturnPolicyPage() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#5A7A60] font-bold">•</span>
-                Missing parts or assembly fasteners.
+                Missing items or components compared to the order slip.
               </li>
             </ul>
           </div>
@@ -159,11 +159,11 @@ export default function ReturnPolicyPage() {
             <ul className="space-y-2.5 text-xs sm:text-sm text-[#5E5E5E]">
               <li className="flex items-start gap-2">
                 <span className="text-[#B8956A] font-bold">•</span>
-                Natural variations in Sheesham wood grain, knots, and slight mineral streaks (which celebrate authentic timber).
+                Natural variations in handcrafted artisan materials such as ceramic glaze, brass oxidation, and glass texture (which are intrinsic characteristics of handmade goods).
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#B8956A] font-bold">•</span>
-                Custom-dimensioned furniture built specifically to non-standard client room blueprints once approved.
+                Custom gift orders built specifically to non-standard client specifications once production has commenced.
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#B8956A] font-bold">•</span>

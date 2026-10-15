@@ -61,7 +61,7 @@ export const Footer: React.FC = () => {
                 <h5 className="text-xs uppercase tracking-wider font-semibold text-[#2C2C2C]">
                   Guaranteed Craftsmanship
                 </h5>
-                <p className="text-xs text-stone-500">Premium solid woods and durable fabrics</p>
+                <p className="text-xs text-stone-500">Authentic materials and premium artisan quality</p>
               </div>
             </div>
 
@@ -114,7 +114,7 @@ export const Footer: React.FC = () => {
           {/* Column 2: Quick Links */}
           <div>
             <h4 className="text-xs uppercase tracking-widest font-semibold text-[#2C2C2C] mb-4">
-              Explore Furniture
+              Gift Categories
             </h4>
             <ul className="space-y-2.5 text-xs text-stone-600">
               {FOOTER_LINKS.quickLinks.map((link) => (
@@ -201,7 +201,7 @@ export const Footer: React.FC = () => {
       {/* Bottom Bar: Copyright & Policies */}
       <div className="border-t border-stone-300/80 py-6 bg-[#EBE3D9]/20 text-xs text-stone-500">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p>© 2024 {SITE_NAME}. All rights reserved. Handcrafted in {LOCATION}.</p>
+          <p>© 2026 {SITE_NAME}. All rights reserved. Handcrafted in {LOCATION}.</p>
           <div className="flex items-center space-x-6 text-[11px]">
             {FOOTER_LINKS.policy.map((p) => (
               <Link key={p.label} href={p.href} className="hover:text-[#2C2C2C] transition-colors">

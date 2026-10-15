@@ -103,7 +103,7 @@ export default function CartPage() {
             Your Shopping Cart is Empty
           </h1>
           <p className="text-stone-500 text-sm mt-3 leading-relaxed">
-            Looks like you haven&apos;t added any bespoke furniture or luxury home decor pieces to your cart yet.
+            Looks like you haven&apos;t added any gifts or luxury home decor pieces to your cart yet.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <Link

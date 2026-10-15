@@ -109,7 +109,7 @@ export default function ShippingPolicyPage() {
                 Orders Above {CURRENCY_SYMBOL} {FREE_DELIVERY_THRESHOLD.toLocaleString()} Ship Free!
               </h3>
               <p className="text-xs text-[#EBE3D9] mt-0.5">
-                Applies automatically at checkout to standard home decor, lighting, and ready-to-ship furniture.
+                Applies automatically at checkout to standard gift items, home decor, and lighting.
               </p>
             </div>
           </div>

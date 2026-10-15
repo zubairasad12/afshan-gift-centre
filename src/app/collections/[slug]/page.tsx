@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
 
   return {
     title: `${formattedTitle} | ${SITE_NAME}`,
-    description: `Shop luxury ${formattedTitle.toLowerCase()} handcrafted with fine timber and premium fabrics at Afshan Gift Centre Vehari.`,
+    description: `Shop ${formattedTitle.toLowerCase()} — handcrafted gift items and home decor at Afshan Gift Centre Vehari. Nationwide delivery available.`,
   };
 }
 
@@ -168,7 +168,7 @@ export default async function CollectionDetailPage({ params, searchParams }: Col
   // Only use products from database so admin modifications persist reliably
   let allProducts = dbProducts;
 
-  // If still empty and slug is a known category like 'furniture' or 'decor', fetch top products from DB
+  // If still empty for a slug that isn't a known category, fetch top products from DB as fallback
   if (allProducts.length === 0) {
     try {
       const generalProducts = await prisma.product.findMany({
@@ -419,10 +419,10 @@ export default async function CollectionDetailPage({ params, searchParams }: Col
         <div className="mt-20 p-8 bg-[#F5F0EB] border border-stone-200/80 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <h4 className="font-serif text-xl font-semibold text-[#2C2C2C]">
-              Need custom measurements for {title}?
+              Looking for something specific in {title}?
             </h4>
             <p className="text-stone-600 text-sm mt-1">
-              Speak directly with our Vehari master craftsmen for custom fabric swatches, wood finishes, or home delivery queries.
+              Speak directly with our Vehari gift specialists for bulk orders, gift packaging, or custom home delivery queries.
             </p>
           </div>
           <a

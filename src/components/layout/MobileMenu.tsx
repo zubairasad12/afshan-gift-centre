@@ -66,7 +66,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onOpenS
             >
               <span className="flex items-center gap-2">
                 <Search className="w-4 h-4 text-[#B8956A]" />
-                Search furniture, decor...
+                Search gifts, decor...
               </span>
             </button>
           </div>

@@ -30,32 +30,32 @@ export default function TermsPage() {
     {
       icon: Scale,
       title: '1. Agreement & Governing Law',
-      desc: 'By visiting our website, ordering products online, or commissioning bespoke furniture through Afshan Gift Centre, you agree to comply with these terms. All commercial transactions, disputes, and contracts are governed in accordance with the applicable laws of the Islamic Republic of Pakistan, subject to the jurisdiction of the courts of Vehari / Multan, Punjab.',
+      desc: 'By visiting our website or placing an order at Afshan Gift Centre, you agree to comply with these terms. All commercial transactions, disputes, and contracts are governed in accordance with the applicable laws of the Islamic Republic of Pakistan, subject to the jurisdiction of the courts of Vehari / Multan, Punjab.',
     },
     {
       icon: CreditCard,
       title: '2. Pricing, Currencies & Payment Terms',
-      desc: 'All prices displayed on this website are listed in Pakistani Rupees (PKR) and include applicable showroom levies. We reserve the right to correct accidental typographic errors in pricing prior to order dispatch. Orders placed via Cash on Delivery (COD) require telephone confirmation. For high-value custom bedroom suites or specialized woodwork, a non-refundable workshop production deposit (typically 20% to 30%) is agreed upon prior to wood slicing.',
+      desc: 'All prices displayed on this website are listed in Pakistani Rupees (PKR). We reserve the right to correct accidental typographic errors in pricing prior to order dispatch. Orders placed via Cash on Delivery (COD) require telephone confirmation. Bulk or custom gift orders may require a partial advance deposit agreed upon prior to processing.',
     },
     {
       icon: Sparkles,
-      title: '3. Woodwork Characteristics & Handcrafting Tolerances',
-      desc: 'Because our furniture is handcrafted from genuine seasoned Sheesham (Dalbergia sissoo) and natural hardwoods, organic variations in grain patterns, natural wood knots, and subtle variations in polish hue are intrinsic badges of authenticity. Minor dimensional variances within ±0.5 inches are accepted industry standards in bespoke woodworking.',
+      title: '3. Product Characteristics & Handcrafting Tolerances',
+      desc: 'Because our gift items include artisan ceramics, hand-hammered brass, mother-of-pearl inlays, and handblown glass, minor natural variations in texture, glaze tone, or finish are intrinsic characteristics of handcrafted goods and are not considered defects.',
     },
     {
       icon: Truck,
       title: '4. Delivery Acceptance & Inspection Responsibilities',
-      desc: 'Customers or authorized representatives are required to inspect the exterior wooden crates or bubble-wrapped parcels upon handover by TCS, Leopard Courier, or our dedicated transport staff. If the parcel exhibits catastrophic transit tampering, note it on the courier delivery run-sheet and notify us within 24 hours.',
+      desc: 'Customers or authorized representatives are required to inspect parcels upon handover by TCS, Leopard Courier, or our dedicated transport staff. If the parcel exhibits visible transit damage, note it on the courier delivery run-sheet and notify us within 24 hours.',
     },
     {
       icon: RotateCcw,
       title: '5. Inspection & Replacement Guarantee',
-      desc: 'All non-bespoke catalog items are protected by our 7-Day Inspection and Replacement Guarantee. Defective, broken, or mismatched items reported within 7 calendar days of receipt with verifiable photographic evidence will be repaired, exchanged, or credited without courier surcharges.',
+      desc: 'All catalog items are protected by our 7-Day Inspection and Replacement Guarantee. Defective, broken, or mismatched items reported within 7 calendar days of receipt with verifiable photographic evidence will be repaired, exchanged, or credited without courier surcharges.',
     },
     {
       icon: FileText,
       title: '6. Intellectual Property & Brand Rights',
-      desc: 'All photographs, custom furniture blueprints, branding graphics, product descriptions, and textual media displayed on this website are the proprietary property of Afshan Gift Centre. Reproduction without written consent is strictly prohibited.',
+      desc: 'All photographs, branding graphics, product descriptions, and textual media displayed on this website are the proprietary property of Afshan Gift Centre. Reproduction without written consent is strictly prohibited.',
     },
   ];
 

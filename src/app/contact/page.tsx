@@ -86,7 +86,7 @@ export default function ContactPage() {
             Contact Afshan Gift Centre
           </h1>
           <p className="mt-4 text-base sm:text-lg text-[#5E5E5E] max-w-2xl mx-auto">
-            Have questions about custom furniture dimensions, delivery to your city, or showroom visits in Vehari? Reach out to our team today.
+            Have questions about gift orders, delivery to your city, or showroom visits in Vehari? Reach out to our team today.
           </p>
         </div>
       </section>
@@ -135,7 +135,7 @@ export default function ContactPage() {
 
               {/* WhatsApp direct button */}
               <a
-                href={`https://wa.me/923001005861?text=Hello%20Afshan%20Gift%20Centre,%20I%20have%20an%20inquiry%20regarding%20furniture%20and%20decor`}
+                href={`https://wa.me/923001005861?text=Hello%20Afshan%20Gift%20Centre,%20I%20have%20an%20inquiry%20regarding%20gifts%20and%20decor`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-[#25D366]/10 text-[#128C7E] hover:bg-[#25D366]/20 font-medium text-sm transition-colors border border-[#25D366]/30"
@@ -207,7 +207,7 @@ export default function ContactPage() {
                   Send Us a Message
                 </h2>
                 <p className="text-sm text-[#5E5E5E] mt-2">
-                  Fill in your details below and our furniture consultant will contact you via phone or email within 24 hours.
+                  Fill in your details below and our gift specialist will contact you via phone or email within 24 hours.
                 </p>
               </div>
 
@@ -289,7 +289,7 @@ export default function ContactPage() {
                       className="w-full px-4 py-2.5 rounded-lg border border-[#DDD1C2] focus:border-[#B8956A] focus:ring-1 focus:ring-[#B8956A] outline-none text-sm bg-[#FAFAF7]"
                     >
                       <option value="General Inquiry">General Inquiry</option>
-                      <option value="Custom Furniture Order">Custom Furniture Order</option>
+                      <option value="Custom Gift Order">Custom Gift Order</option>
                       <option value="Order Tracking & Delivery">Order Tracking & Delivery</option>
                       <option value="Showroom Visit Appointment">Showroom Visit Appointment</option>
                       <option value="Bulk / Wedding Package">Bulk / Wedding Package</option>

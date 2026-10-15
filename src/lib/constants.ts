@@ -44,7 +44,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     label: "Decor & Lighting",
-    href: "/collections/decor",
+    href: "/collections",
     children: [
       { label: "Table Lamps", href: "/collections/table-lamps", description: "Ambient ceramic and brushed brass designer bedside & desk lamps" },
       { label: "Floor Lamps", href: "/collections/floor-lamps", description: "Minimalist ambient floor lamps for warm room corners" },

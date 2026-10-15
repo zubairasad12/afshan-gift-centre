@@ -32,7 +32,7 @@ export default function PrivacyPolicyPage() {
       title: '1. Information We Collect',
       content: [
         'Contact & Shipping Details: Full name, delivery street address, city, postal code, mobile phone number, and email address when placing orders or submitting inquiries.',
-        'Order & Transaction Records: Products ordered, custom furniture specifications, transaction confirmations, and delivery status milestones.',
+        'Order & Transaction Records: Products ordered, gift packaging preferences, transaction confirmations, and delivery status milestones.',
         'Communication Logs: Records of inquiries or customer support messages sent via our website contact forms, WhatsApp, or phone calls with our Vehari desk.',
       ],
     },

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Search, X, ArrowRight } from 'lucide-react';
+import { Search, X, ArrowRight, Sparkles, Loader2 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 
 interface SearchOverlayProps {
@@ -10,87 +10,64 @@ interface SearchOverlayProps {
   onClose: () => void;
 }
 
-const SAMPLE_SEARCH_PRODUCTS = [
-  {
-    id: 'p1',
-    name: 'Royale Chesterfield Velvet 3-Seater Sofa',
-    category: 'Sofas',
-    price: 85000,
-    compareAtPrice: 95000,
-    slug: 'royale-chesterfield-velvet-sofa',
-    image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&q=80',
-  },
-  {
-    id: 'p2',
-    name: 'Artisan Solid Sheesham Dining Table 6-Seater',
-    category: 'Dining Tables',
-    price: 110000,
-    compareAtPrice: 125000,
-    slug: 'artisan-solid-sheesham-dining-table',
-    image: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?auto=format&fit=crop&w=600&q=80',
-  },
-  {
-    id: 'p3',
-    name: 'Gilded Brass Arch Floor Standing Mirror',
-    category: 'Decor',
-    price: 24500,
-    compareAtPrice: 29000,
-    slug: 'gilded-brass-arch-floor-standing-mirror',
-    image: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80',
-  },
-  {
-    id: 'p4',
-    name: 'Venetian Crystal Grand Chandelier',
-    category: 'Lighting',
-    price: 68000,
-    compareAtPrice: 78000,
-    slug: 'venetian-crystal-grand-chandelier',
-    image: 'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&w=600&q=80',
-  },
-  {
-    id: 'p5',
-    name: 'Nordic Oak Minimalist Coffee Table',
-    category: 'Coffee Tables',
-    price: 32000,
-    compareAtPrice: 38000,
-    slug: 'nordic-oak-minimalist-coffee-table',
-    image: 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=600&q=80',
-  },
-  {
-    id: 'p6',
-    name: 'Vehari Heritage Handcarved King Bedstead',
-    category: 'Beds',
-    price: 145000,
-    compareAtPrice: 165000,
-    slug: 'vehari-heritage-handcarved-king-bedstead',
-    image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=80',
-  },
-];
+interface SearchProductItem {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  compareAtPrice?: number | null;
+  slug: string;
+  image: string;
+}
 
 const POPULAR_SEARCHES = [
-  'Chesterfield Sofa',
-  'Dining Table',
-  'Brass Mirror',
-  'Chandeliers',
-  'King Bed',
-  'Wall Sconce',
+  'Tissue Boxes',
+  'Plants',
+  'Planters & Pots',
   'Vases',
+  'Wall Frames',
+  'Table Lamps',
+  'Candles',
+  'Crystal Jar',
 ];
 
 export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose }) => {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState(SAMPLE_SEARCH_PRODUCTS);
+  const [results, setResults] = useState<SearchProductItem[]>([]);
+  const [recommended, setRecommended] = useState<SearchProductItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Fetch initial recommended products on open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
+
+      // Fetch featured products from live API for recommendations
+      fetch('/api/search?limit=6')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && Array.isArray(data.products)) {
+            const mapped: SearchProductItem[] = data.products.map((p: any) => ({
+              id: p.id,
+              name: p.name,
+              category: p.category?.name || 'Gift Item',
+              price: p.price,
+              compareAtPrice: p.compareAtPrice,
+              slug: p.slug,
+              image: p.images?.[0]?.url || '/uploads/1791997481095-WhatsApp_Image_2026-10-13_at_8.57.34_PM.jpeg',
+            }));
+            setRecommended(mapped);
+          }
+        })
+        .catch(() => {});
     } else {
       document.body.style.overflow = '';
       setQuery('');
+      setResults([]);
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -106,130 +83,220 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
     };
   }, [isOpen, onClose]);
 
+  // Query live API with debounce
   useEffect(() => {
+    if (!query.trim()) {
+      setResults([]);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
     const handler = setTimeout(() => {
-      if (!query.trim()) {
-        setResults(SAMPLE_SEARCH_PRODUCTS);
-      } else {
-        const q = query.toLowerCase();
-        const filtered = SAMPLE_SEARCH_PRODUCTS.filter(
-          (p) =>
-            p.name.toLowerCase().includes(q) ||
-            p.category.toLowerCase().includes(q)
-        );
-        setResults(filtered);
-      }
-    }, 200);
+      fetch(`/api/search?q=${encodeURIComponent(query.trim())}&limit=8`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && Array.isArray(data.products)) {
+            const mapped: SearchProductItem[] = data.products.map((p: any) => ({
+              id: p.id,
+              name: p.name,
+              category: p.category?.name || 'Gift Item',
+              price: p.price,
+              compareAtPrice: p.compareAtPrice,
+              slug: p.slug,
+              image: p.images?.[0]?.url || '/uploads/1791997481095-WhatsApp_Image_2026-10-13_at_8.57.34_PM.jpeg',
+            }));
+            setResults(mapped);
+          } else {
+            setResults([]);
+          }
+        })
+        .catch(() => {
+          setResults([]);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }, 250);
 
     return () => clearTimeout(handler);
   }, [query]);
 
   if (!isOpen) return null;
 
+  const displayList = query.trim() ? results : recommended;
+  const isSearchEmpty = query.trim().length > 0 && results.length === 0 && !isLoading;
+
   return (
     <div
-      className="fixed inset-0 z-50 bg-[#FAFAF7]/95 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Site Search"
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm animate-fade-in flex flex-col justify-start overflow-y-auto"
+      onClick={onClose}
     >
-      <div className="container mx-auto max-w-5xl px-4 py-8">
-        {/* Top bar with Close */}
-        <div className="flex justify-end mb-4">
-          <button
-            onClick={onClose}
-            type="button"
-            className="flex items-center gap-1.5 text-stone-500 hover:text-[#2C2C2C] text-sm uppercase tracking-wider font-medium p-2 transition-colors"
-            aria-label="Close search"
-          >
-            <span>Close (ESC)</span>
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Big Search Input */}
-        <div className="relative border-b-2 border-[#2C2C2C] pb-4 mb-8">
-          <div className="flex items-center gap-4">
-            <Search className="w-8 h-8 text-[#B8956A] shrink-0" />
-            <input
-              ref={inputRef}
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search luxury furniture, chandeliers, decor..."
-              className="w-full text-2xl md:text-4xl font-serif bg-transparent text-[#2C2C2C] placeholder:text-stone-400 focus:outline-none"
-            />
-            {query && (
-              <button
-                type="button"
-                onClick={() => setQuery('')}
-                className="p-1 text-stone-400 hover:text-[#2C2C2C]"
-                aria-label="Clear query"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            )}
+      <div
+        className="bg-white w-full min-h-[50vh] p-6 md:p-12 shadow-2xl relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="max-w-4xl mx-auto">
+          {/* Close Button Top */}
+          <div className="flex justify-end mb-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 text-stone-500 hover:text-[#2C2C2C] hover:bg-stone-100 rounded-full transition-colors flex items-center gap-1.5 text-xs uppercase tracking-wider font-semibold"
+              aria-label="Close search"
+            >
+              <span>Close</span>
+              <X className="w-5 h-5" />
+            </button>
           </div>
-        </div>
 
-        {/* Popular Tags */}
-        <div className="mb-10">
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-stone-500 mb-3">
-            Popular Searches
-          </h4>
-          <div className="flex flex-wrap gap-2">
-            {POPULAR_SEARCHES.map((term) => (
-              <button
-                key={term}
-                type="button"
-                onClick={() => setQuery(term)}
-                className="px-3.5 py-1.5 text-xs bg-[#F5F0EB] text-[#3D3229] hover:bg-[#2C2C2C] hover:text-white transition-colors duration-150"
-              >
-                {term}
-              </button>
-            ))}
+          {/* Big Search Input */}
+          <div className="relative border-b-2 border-[#2C2C2C] pb-4 mb-8">
+            <div className="flex items-center gap-4">
+              <Search className="w-8 h-8 text-[#B8956A] shrink-0" />
+              <input
+                ref={inputRef}
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search tissue boxes, plants, pots, vases, frames, lamps..."
+                className="w-full text-xl sm:text-2xl md:text-3xl font-serif bg-transparent text-[#2C2C2C] placeholder:text-stone-400 focus:outline-none"
+              />
+              {isLoading && (
+                <Loader2 className="w-5 h-5 text-[#B8956A] animate-spin shrink-0" />
+              )}
+              {query && !isLoading && (
+                <button
+                  type="button"
+                  onClick={() => setQuery('')}
+                  className="p-1 text-stone-400 hover:text-[#2C2C2C]"
+                  aria-label="Clear query"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Results Section */}
-        <div>
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-[#3D3229]">
-              {query ? `Search Results (${results.length})` : 'Recommended For You'}
+          {/* Popular Tags */}
+          <div className="mb-10">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-stone-500 mb-3 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-[#B8956A]" />
+              Popular Gift Searches
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {POPULAR_SEARCHES.map((term) => (
+                <button
+                  key={term}
+                  type="button"
+                  onClick={() => setQuery(term)}
+                  className="px-3.5 py-1.5 text-xs bg-[#F5F0EB] text-[#3D3229] hover:bg-[#2C2C2C] hover:text-white transition-colors duration-150 rounded-sm"
+                >
+                  {term}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Results or Recommendations Header */}
+          <div className="flex items-center justify-between mb-6 pb-2 border-b border-stone-100">
+            <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-[#3D3229]">
+              {query.trim()
+                ? `Search Results (${results.length})`
+                : 'Recommended For You'}
             </h3>
-            {query && (
+            {query.trim() && (
               <Link
-                href={`/collections?search=${encodeURIComponent(query)}`}
+                href={`/search?q=${encodeURIComponent(query.trim())}`}
                 onClick={onClose}
                 className="text-xs uppercase tracking-wider font-semibold text-[#B8956A] hover:underline flex items-center gap-1"
               >
-                <span>View all results</span>
+                <span>View on full search page</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             )}
           </div>
 
-          {results.length === 0 ? (
-            <div className="py-16 text-center">
-              <p className="text-base text-stone-500 mb-4">
-                No products found matching &ldquo;{query}&rdquo;.
-              </p>
-              <button
-                type="button"
-                onClick={() => setQuery('')}
-                className="text-sm text-[#B8956A] hover:underline uppercase tracking-wider font-semibold"
-              >
-                Reset search
-              </button>
+          {/* Empty Search State */}
+          {isSearchEmpty ? (
+            <div className="space-y-8">
+              <div className="py-12 px-6 text-center bg-[#FAF7F4] border border-stone-200/80 rounded-xl">
+                <Search className="w-10 h-10 text-stone-300 mx-auto mb-3" />
+                <h4 className="font-serif text-lg font-semibold text-[#2C2C2C]">
+                  No products found for &ldquo;{query}&rdquo;
+                </h4>
+                <p className="text-xs sm:text-sm text-stone-500 mt-1.5 max-w-md mx-auto">
+                  We couldn&apos;t find any items matching your search. Please check your spelling or browse popular categories below.
+                </p>
+                <div className="mt-4 flex flex-wrap justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setQuery('')}
+                    className="px-4 py-2 bg-[#2C2C2C] text-white text-xs uppercase font-semibold tracking-wider hover:bg-black transition-colors"
+                  >
+                    Clear Search
+                  </button>
+                  <Link
+                    href="/collections"
+                    onClick={onClose}
+                    className="px-4 py-2 border border-stone-300 text-[#2C2C2C] text-xs uppercase font-semibold tracking-wider hover:bg-white transition-colors"
+                  >
+                    Browse Collections
+                  </Link>
+                </div>
+              </div>
+
+              {/* Recommended alternatives shown below empty state */}
+              {recommended.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-stone-600 mb-4">
+                    Recommended Alternatives:
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {recommended.slice(0, 3).map((product) => (
+                      <Link
+                        key={product.id}
+                        href={`/products/${product.slug}`}
+                        onClick={onClose}
+                        className="group flex gap-3 p-3 bg-white border border-stone-200/80 hover:border-[#B8956A] transition-all duration-200 hover:shadow-subtle rounded-sm"
+                      >
+                        <div className="relative w-16 h-20 bg-stone-100 shrink-0 overflow-hidden">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src =
+                                'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=300&q=80';
+                            }}
+                          />
+                        </div>
+                        <div className="flex flex-col justify-center min-w-0">
+                          <span className="text-[10px] tracking-wider uppercase text-stone-500 mb-0.5">
+                            {product.category}
+                          </span>
+                          <h5 className="text-xs font-medium text-[#2C2C2C] group-hover:text-[#B8956A] transition-colors truncate">
+                            {product.name}
+                          </h5>
+                          <span className="text-xs font-semibold text-[#2C2C2C] mt-1">
+                            {formatPrice(product.price)}
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {results.map((product) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {displayList.map((product) => (
                 <Link
                   key={product.id}
                   href={`/products/${product.slug}`}
                   onClick={onClose}
-                  className="group flex gap-4 p-3 bg-white border border-stone-200/80 hover:border-[#B8956A] transition-all duration-200 hover:shadow-subtle"
+                  className="group flex gap-4 p-3 bg-white border border-stone-200/80 hover:border-[#B8956A] transition-all duration-200 hover:shadow-subtle rounded-sm"
                 >
                   <div className="relative w-20 h-24 bg-stone-100 shrink-0 overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -237,22 +304,25 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose })
                       src={product.image}
                       alt={product.name}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=300&q=80'; }}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src =
+                          'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=300&q=80';
+                      }}
                     />
                   </div>
                   <div className="flex flex-col justify-center min-w-0">
                     <span className="text-[10px] tracking-wider uppercase text-stone-500 mb-1">
                       {product.category}
                     </span>
-                    <h5 className="text-sm font-medium text-[#2C2C2C] group-hover:text-[#B8956A] transition-colors truncate">
+                    <h5 className="text-xs sm:text-sm font-medium text-[#2C2C2C] group-hover:text-[#B8956A] transition-colors truncate">
                       {product.name}
                     </h5>
                     <div className="mt-1 flex items-baseline gap-2">
-                      <span className="text-sm font-semibold text-[#2C2C2C]">
+                      <span className="text-xs sm:text-sm font-semibold text-[#2C2C2C]">
                         {formatPrice(product.price)}
                       </span>
                       {product.compareAtPrice && (
-                        <span className="text-xs text-stone-400 line-through">
+                        <span className="text-[11px] text-stone-400 line-through">
                           {formatPrice(product.compareAtPrice)}
                         </span>
                       )}

@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
@@ -11,7 +12,6 @@ interface ProductPageProps {
     slug: string;
   };
 }
-
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const slug = params.slug.toLowerCase();
@@ -28,18 +28,13 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
         description: product.shortDescription || product.description.slice(0, 160),
       };
     }
-  } catch (err) {
-    // continue to fallback
+  } catch {
+    // ignore
   }
 
-  const formattedName = slug
-    .split('-')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-
   return {
-    title: `${formattedName} | ${SITE_NAME}`,
-    description: `Shop ${formattedName} at Afshan Gift Centre Vehari. Premium furniture and home decor with nationwide delivery in Pakistan.`,
+    title: `Product Details | ${SITE_NAME}`,
+    description: 'Explore handcrafted luxury gift items at Afshan Gift Centre Vehari.',
   };
 }
 
@@ -53,9 +48,14 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     const dbProduct = await prisma.product.findUnique({
       where: { slug },
       include: {
-        images: { orderBy: { position: 'asc' } },
-        variants: { where: { isActive: true } },
+        images: {
+          orderBy: { position: 'asc' },
+        },
         category: true,
+        variants: {
+          where: { isActive: true },
+          orderBy: { price: 'asc' },
+        },
       },
     });
 
@@ -74,7 +74,6 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         isOnSale: dbProduct.isOnSale,
         material: dbProduct.material || undefined,
         dimensions: dbProduct.dimensions || undefined,
-        stock: 10,
         images: dbProduct.images.map((img) => ({
           id: img.id,
           url: img.url,
@@ -99,77 +98,24 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         createdAt: dbProduct.createdAt.toISOString(),
       };
 
-      // Fetch related products in same category
-      const rawRelated = await prisma.product.findMany({
-        where: {
-          isActive: true,
-          id: { not: dbProduct.id },
-          ...(dbProduct.categoryId ? { categoryId: dbProduct.categoryId } : {}),
-        },
-        take: 4,
-        include: {
-          images: { orderBy: { position: 'asc' } },
-          category: true,
-          variants: true,
-        },
-      });
+      // 1. Fetch related products in the same category
+      if (dbProduct.categoryId) {
+        const rawRelated = await prisma.product.findMany({
+          where: {
+            isActive: true,
+            id: { not: dbProduct.id },
+            categoryId: dbProduct.categoryId,
+          },
+          take: 4,
+          orderBy: [{ isFeatured: 'desc' }, { createdAt: 'desc' }],
+          include: {
+            images: { orderBy: { position: 'asc' } },
+            category: true,
+            variants: { where: { isActive: true } },
+          },
+        });
 
-      relatedProducts = rawRelated.map((p) => ({
-        id: p.id,
-        name: p.name,
-        slug: p.slug,
-        description: p.description,
-        sku: p.sku,
-        price: p.price,
-        compareAtPrice: p.compareAtPrice,
-        isFeatured: p.isFeatured,
-        isActive: p.isActive,
-        isOnSale: p.isOnSale,
-        material: p.material || undefined,
-        dimensions: p.dimensions || undefined,
-        images: p.images.map((img) => ({
-          id: img.id,
-          url: img.url,
-          altText: img.alt || p.name,
-          isPrimary: img.isPrimary,
-        })),
-        variants: p.variants.map((v) => ({
-          id: v.id,
-          name: v.name,
-          sku: v.sku,
-          price: v.price,
-          stock: v.stock,
-        })),
-        category: p.category
-          ? { id: p.category.id, name: p.category.name, slug: p.category.slug }
-          : undefined,
-        createdAt: p.createdAt.toISOString(),
-      }));
-    }
-  } catch (error) {
-    console.error('Error fetching product from Prisma:', error);
-  }
-
-  // If not found in DB, return 404
-  if (!product) {
-    notFound();
-  }
-
-  // If no related products, fetch any 4 general products
-  if (relatedProducts.length === 0) {
-    try {
-      const fallbackRelated = await prisma.product.findMany({
-        where: { isActive: true },
-        take: 4,
-        include: {
-          images: { orderBy: { position: 'asc' } },
-          category: true,
-          variants: true,
-        },
-      });
-
-      if (fallbackRelated.length > 0) {
-        relatedProducts = fallbackRelated.map((p) => ({
+        relatedProducts = rawRelated.map((p) => ({
           id: p.id,
           name: p.name,
           slug: p.slug,
@@ -201,9 +147,68 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           createdAt: p.createdAt.toISOString(),
         }));
       }
-    } catch {
-      // ignore
+
+      // 2. If fewer than 4 related in same category, supplement with featured gift items from catalogue
+      if (relatedProducts.length < 4) {
+        const excludeIds = [dbProduct.id, ...relatedProducts.map((p) => p.id)];
+        const needed = 4 - relatedProducts.length;
+
+        const extraProducts = await prisma.product.findMany({
+          where: {
+            isActive: true,
+            id: { notIn: excludeIds },
+          },
+          take: needed,
+          orderBy: [{ isFeatured: 'desc' }, { createdAt: 'desc' }],
+          include: {
+            images: { orderBy: { position: 'asc' } },
+            category: true,
+            variants: { where: { isActive: true } },
+          },
+        });
+
+        const mappedExtra: Product[] = extraProducts.map((p) => ({
+          id: p.id,
+          name: p.name,
+          slug: p.slug,
+          description: p.description,
+          sku: p.sku,
+          price: p.price,
+          compareAtPrice: p.compareAtPrice,
+          isFeatured: p.isFeatured,
+          isActive: p.isActive,
+          isOnSale: p.isOnSale,
+          material: p.material || undefined,
+          dimensions: p.dimensions || undefined,
+          images: p.images.map((img) => ({
+            id: img.id,
+            url: img.url,
+            altText: img.alt || p.name,
+            isPrimary: img.isPrimary,
+          })),
+          variants: p.variants.map((v) => ({
+            id: v.id,
+            name: v.name,
+            sku: v.sku,
+            price: v.price,
+            stock: v.stock,
+          })),
+          category: p.category
+            ? { id: p.category.id, name: p.category.name, slug: p.category.slug }
+            : undefined,
+          createdAt: p.createdAt.toISOString(),
+        }));
+
+        relatedProducts = [...relatedProducts, ...mappedExtra];
+      }
     }
+  } catch (error) {
+    console.error('Error fetching product from Prisma:', error);
+  }
+
+  // If not found in DB, return 404
+  if (!product) {
+    notFound();
   }
 
   return <ProductDetailClient product={product} relatedProducts={relatedProducts} />;

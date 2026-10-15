@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Metadata } from 'next';
-import { Search as SearchIcon, Filter, RotateCcw, ArrowRight } from 'lucide-react';
+import { Search as SearchIcon, ArrowRight, Sparkles } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
 import ProductCard from '@/components/product/ProductCard';
 import { Product } from '@/types/product';
@@ -20,20 +20,18 @@ interface SearchPageProps {
 
 export const metadata: Metadata = {
   title: `Search Products | ${SITE_NAME}`,
-  description: 'Search our handcrafted furniture, lighting, and home decor pieces at Afshan Gift Centre Vehari.',
+  description: 'Search our curated collection of luxury tissue boxes, botanical plants, artisan pots, handcrafted vases, and gilded wall frames at Afshan Gift Centre Vehari.',
 };
 
 const POPULAR_SEARCH_TERMS = [
-  'Sofa',
-  'Dining Table',
-  'Chandelier',
-  'Velvet Chair',
-  'Mirror',
-  'Clock',
+  'Tissue Box',
+  'Plants',
+  'Planter',
   'Vase',
-  'Bed',
-  'Candles',
-  'Coffee Table',
+  'Wall Frame',
+  'Lamp',
+  'Candle',
+  'Crystal Jar',
 ];
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
@@ -44,25 +42,29 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const maxPrice = searchParams?.maxPrice ? parseFloat(searchParams.maxPrice) : undefined;
 
   let products: Product[] = [];
-  let categories: { id: string; name: string; slug: string }[] = [];
+  let recommendedProducts: Product[] = [];
 
   try {
-    categories = await prisma.category.findMany({
-      where: { isActive: true },
-      select: { id: true, name: true, slug: true },
-      take: 12,
-    });
-
     const where: any = {
       isActive: true,
     };
 
     if (query) {
+      const keywords = query.split(/\s+/).filter(Boolean);
       where.OR = [
         { name: { contains: query } },
         { description: { contains: query } },
         { tags: { contains: query } },
         { material: { contains: query } },
+        { sku: { contains: query } },
+        { category: { name: { contains: query } } },
+        ...keywords.flatMap((k) => [
+          { name: { contains: k } },
+          { description: { contains: k } },
+          { tags: { contains: k } },
+          { material: { contains: k } },
+          { category: { name: { contains: k } } },
+        ]),
       ];
     }
 
@@ -86,7 +88,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     const rawProducts = await prisma.product.findMany({
       where,
       orderBy,
-      take: 36,
+      take: 40,
       include: {
         images: { orderBy: { position: 'asc' } },
         category: true,
@@ -125,70 +127,54 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         : undefined,
       createdAt: p.createdAt.toISOString(),
     }));
+
+    // If no products match, fetch 4 featured recommendations to show below the empty state
+    if (products.length === 0) {
+      const rawRecommended = await prisma.product.findMany({
+        where: { isActive: true },
+        take: 4,
+        orderBy: [{ isFeatured: 'desc' }, { createdAt: 'desc' }],
+        include: {
+          images: { orderBy: { position: 'asc' } },
+          category: true,
+          variants: { where: { isActive: true } },
+        },
+      });
+
+      recommendedProducts = rawRecommended.map((p) => ({
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        description: p.description,
+        sku: p.sku,
+        price: p.price,
+        compareAtPrice: p.compareAtPrice,
+        isFeatured: p.isFeatured,
+        isActive: p.isActive,
+        isOnSale: p.isOnSale,
+        material: p.material || undefined,
+        dimensions: p.dimensions || undefined,
+        images: p.images.map((img) => ({
+          id: img.id,
+          url: img.url,
+          altText: img.alt || p.name,
+          isPrimary: img.isPrimary,
+        })),
+        variants: p.variants.map((v) => ({
+          id: v.id,
+          name: v.name,
+          sku: v.sku,
+          price: v.price,
+          stock: v.stock,
+        })),
+        category: p.category
+          ? { id: p.category.id, name: p.category.name, slug: p.category.slug }
+          : undefined,
+        createdAt: p.createdAt.toISOString(),
+      }));
+    }
   } catch (err) {
     console.error('Failed to run search query:', err);
-  }
-
-  // Fallback demo results if database product count is empty and user searched
-  if (products.length === 0 && query) {
-    const demoItems: Product[] = [
-      {
-        id: 'sr-1',
-        name: 'Royale Chesterfield 3-Seater Velvet Sofa',
-        slug: 'royale-chesterfield-3-seater-velvet-sofa',
-        description: 'Deep button-tufted upholstery with solid Sheesham wood frame.',
-        sku: 'AGC-SOF-001',
-        price: 85000,
-        compareAtPrice: 95000,
-        isFeatured: true,
-        isActive: true,
-        isOnSale: true,
-        material: 'Velvet & Sheesham Wood',
-        images: [
-          {
-            id: 'sr-1a',
-            url: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80',
-            altText: 'Chesterfield Sofa',
-            isPrimary: true,
-          },
-        ],
-        variants: [],
-        category: { id: 'c-sofas', name: 'Sofas', slug: 'sofas' },
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: 'sr-2',
-        name: 'Artisan Solid Sheesham 6-Seater Dining Table',
-        slug: 'artisan-solid-sheesham-dining-table',
-        description: 'Natural grain solid Sheesham hardwood finished in satin warm walnut.',
-        sku: 'AGC-DIN-001',
-        price: 110000,
-        compareAtPrice: 125000,
-        isFeatured: true,
-        isActive: true,
-        isOnSale: true,
-        material: '100% Solid Sheesham',
-        images: [
-          {
-            id: 'sr-2a',
-            url: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?auto=format&fit=crop&w=800&q=80',
-            altText: 'Dining Table',
-            isPrimary: true,
-          },
-        ],
-        variants: [],
-        category: { id: 'c-dining', name: 'Dining Tables', slug: 'dining-tables' },
-        createdAt: new Date().toISOString(),
-      },
-    ];
-
-    const qLower = query.toLowerCase();
-    products = demoItems.filter(
-      (p) =>
-        p.name.toLowerCase().includes(qLower) ||
-        p.description.toLowerCase().includes(qLower) ||
-        p.category?.name.toLowerCase().includes(qLower)
-    );
   }
 
   return (
@@ -200,7 +186,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             Catalog Search
           </span>
           <h1 className="font-serif text-3xl sm:text-4xl font-semibold text-[#2C2C2C] tracking-tight">
-            Find Your Perfect Piece
+            Find Your Perfect Gift
           </h1>
 
           {/* Search Input Bar */}
@@ -210,8 +196,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 type="text"
                 name="q"
                 defaultValue={query}
-                placeholder="Search sofas, dining tables, lamps, vases, clocks..."
-                className="w-full pl-11 pr-4 py-3.5 text-xs sm:text-sm border border-stone-300 focus:outline-none focus:border-[#B8956A] bg-white"
+                placeholder="Search tissue boxes, botanical plants, planters, vases, wall frames..."
+                className="w-full pl-11 pr-4 py-3.5 text-xs sm:text-sm border border-stone-300 focus:outline-none focus:border-[#B8956A] bg-white text-[#2C2C2C]"
               />
               <SearchIcon className="w-4 h-4 text-stone-400 absolute left-4 top-1/2 -translate-y-1/2" />
             </div>
@@ -225,7 +211,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
           {/* Popular Search Suggestions */}
           <div className="mt-4 flex flex-wrap justify-center items-center gap-2 text-xs text-stone-500">
-            <span className="text-stone-400">Popular:</span>
+            <span className="text-stone-400 font-medium">Popular:</span>
             {POPULAR_SEARCH_TERMS.map((term) => (
               <Link
                 key={term}
@@ -300,29 +286,53 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16 px-4 bg-white border border-stone-200 max-w-xl mx-auto">
-            <SearchIcon className="w-10 h-10 text-stone-300 mx-auto mb-3" />
-            <h3 className="font-serif text-xl font-semibold text-[#2C2C2C]">
-              No exact matches found for &ldquo;{query}&rdquo;
-            </h3>
-            <p className="text-stone-500 text-xs sm:text-sm mt-2 max-w-sm mx-auto leading-relaxed">
-              Try checking your spelling, using more general search terms, or exploring our full catalog by category.
-            </p>
-            <div className="mt-6 flex flex-wrap justify-center gap-3">
-              <Link
-                href="/collections"
-                className="px-6 py-2.5 bg-[#2C2C2C] hover:bg-black text-white text-xs uppercase font-semibold tracking-wider transition-colors inline-flex items-center gap-2"
-              >
-                <span>Browse All Collections</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-              <Link
-                href="/collections/sale"
-                className="px-6 py-2.5 border border-stone-300 hover:border-stone-400 text-[#2C2C2C] text-xs uppercase font-semibold tracking-wider transition-colors"
-              >
-                View Discounted Items
-              </Link>
+          <div className="space-y-12">
+            <div className="text-center py-16 px-4 bg-white border border-stone-200 max-w-xl mx-auto rounded-xl">
+              <SearchIcon className="w-10 h-10 text-stone-300 mx-auto mb-3" />
+              <h3 className="font-serif text-xl font-semibold text-[#2C2C2C]">
+                No products found
+              </h3>
+              <p className="text-stone-500 text-xs sm:text-sm mt-2 max-w-sm mx-auto leading-relaxed">
+                {query
+                  ? `We couldn't find any products matching "${query}". Check your spelling or browse popular gift collections below.`
+                  : 'No products are currently available in this filter.'}
+              </p>
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
+                <Link
+                  href="/collections"
+                  className="px-6 py-2.5 bg-[#2C2C2C] hover:bg-black text-white text-xs uppercase font-semibold tracking-wider transition-colors inline-flex items-center gap-2"
+                >
+                  <span>Browse All Collections</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+                <Link
+                  href="/collections/tissue-boxes"
+                  className="px-6 py-2.5 border border-stone-300 hover:border-stone-400 text-[#2C2C2C] text-xs uppercase font-semibold tracking-wider transition-colors"
+                >
+                  Tissue Boxes
+                </Link>
+              </div>
             </div>
+
+            {/* Recommended Products Below Empty State */}
+            {recommendedProducts.length > 0 && (
+              <div className="mt-12 pt-10 border-t border-stone-200">
+                <div className="text-center max-w-xl mx-auto mb-8">
+                  <span className="text-[#B8956A] text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-1.5 mb-1">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    Recommended For You
+                  </span>
+                  <h3 className="font-serif text-2xl font-bold text-[#2C2C2C]">
+                    Popular Gift Items
+                  </h3>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+                  {recommendedProducts.map((recProd) => (
+                    <ProductCard key={recProd.id} product={recProd} />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

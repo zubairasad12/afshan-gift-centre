@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
+import { v2 as cloudinary } from 'cloudinary';
 
 export const dynamic = 'force-dynamic';
+
+// Configure Cloudinary from env vars
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || '',
+  api_key: process.env.CLOUDINARY_API_KEY || '',
+  api_secret: process.env.CLOUDINARY_API_SECRET || '',
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,31 +22,58 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      return NextResponse.json(
+        { success: false, message: 'Only image files are allowed.' },
+        { status: 400 }
+      );
+    }
+
+    // Max 10MB
+    if (file.size > 10 * 1024 * 1024) {
+      return NextResponse.json(
+        { success: false, message: 'Image must be under 10MB.' },
+        { status: 400 }
+      );
+    }
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Create uploads directory in public/uploads
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    await mkdir(uploadDir, { recursive: true });
+    // Convert to base64 for Cloudinary upload
+    const base64Data = `data:${file.type};base64,${buffer.toString('base64')}`;
 
-    // Clean filename and make unique
-    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-    const filename = `${Date.now()}-${sanitizedName}`;
-    const filePath = path.join(uploadDir, filename);
+    // Clean filename for public_id
+    const sanitizedName = file.name
+      .replace(/[^a-zA-Z0-9.-]/g, '_')
+      .replace(/\.[^/.]+$/, ''); // remove extension
+    const publicId = `afshan-gift-centre/${Date.now()}-${sanitizedName}`;
 
-    await writeFile(filePath, buffer);
-
-    const publicUrl = `/uploads/${filename}`;
+    // Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(base64Data, {
+      public_id: publicId,
+      folder: 'afshan-gift-centre',
+      resource_type: 'image',
+      transformation: [
+        { width: 1200, height: 1600, crop: 'limit', quality: 'auto' },
+      ],
+    });
 
     return NextResponse.json({
       success: true,
-      url: publicUrl,
-      filename,
+      url: result.secure_url,
+      publicId: result.public_id,
+      filename: `${Date.now()}-${file.name}`,
     });
   } catch (error) {
-    console.error('Error uploading image:', error);
+    console.error('Error uploading image to Cloudinary:', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to upload image' },
+      {
+        success: false,
+        message:
+          'Failed to upload image. Make sure Cloudinary credentials are set in environment variables.',
+      },
       { status: 500 }
     );
   }

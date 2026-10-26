@@ -3,15 +3,30 @@ import { v2 as cloudinary } from 'cloudinary';
 
 export const dynamic = 'force-dynamic';
 
-// Configure Cloudinary from env vars
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || '',
-  api_key: process.env.CLOUDINARY_API_KEY || '',
-  api_secret: process.env.CLOUDINARY_API_SECRET || '',
-});
-
 export async function POST(request: NextRequest) {
   try {
+    // Configure inside the function so Vercel env vars are always available
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+
+    // Check credentials are actually set
+    if (
+      !process.env.CLOUDINARY_CLOUD_NAME ||
+      !process.env.CLOUDINARY_API_KEY ||
+      !process.env.CLOUDINARY_API_SECRET
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `Cloudinary credentials missing. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET in Vercel environment variables.`,
+        },
+        { status: 500 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
 
@@ -22,7 +37,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       return NextResponse.json(
         { success: false, message: 'Only image files are allowed.' },
@@ -30,7 +44,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Max 10MB
     if (file.size > 10 * 1024 * 1024) {
       return NextResponse.json(
         { success: false, message: 'Image must be under 10MB.' },
@@ -40,20 +53,15 @@ export async function POST(request: NextRequest) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-
-    // Convert to base64 for Cloudinary upload
     const base64Data = `data:${file.type};base64,${buffer.toString('base64')}`;
 
-    // Clean filename for public_id
     const sanitizedName = file.name
       .replace(/[^a-zA-Z0-9.-]/g, '_')
-      .replace(/\.[^/.]+$/, ''); // remove extension
-    const publicId = `afshan-gift-centre/${Date.now()}-${sanitizedName}`;
+      .replace(/\.[^/.]+$/, '');
 
-    // Upload to Cloudinary
     const result = await cloudinary.uploader.upload(base64Data, {
-      public_id: publicId,
       folder: 'afshan-gift-centre',
+      public_id: `${Date.now()}-${sanitizedName}`,
       resource_type: 'image',
       transformation: [
         { width: 1200, height: 1600, crop: 'limit', quality: 'auto' },
@@ -66,13 +74,12 @@ export async function POST(request: NextRequest) {
       publicId: result.public_id,
       filename: `${Date.now()}-${file.name}`,
     });
-  } catch (error) {
-    console.error('Error uploading image to Cloudinary:', error);
+  } catch (error: any) {
+    console.error('Cloudinary upload error:', error);
     return NextResponse.json(
       {
         success: false,
-        message:
-          'Failed to upload image. Make sure Cloudinary credentials are set in environment variables.',
+        message: error?.message || 'Upload failed. Check Vercel logs for details.',
       },
       { status: 500 }
     );
